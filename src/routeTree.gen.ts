@@ -14,7 +14,9 @@ import { Route as LlaveRouteImport } from './routes/llave'
 import { Route as GoleadoresRouteImport } from './routes/goleadores'
 import { Route as FixtureRouteImport } from './routes/fixture'
 import { Route as EquiposRouteImport } from './routes/equipos'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicBootstrapAdminRouteImport } from './routes/api/public/bootstrap-admin'
 
 const TablaRoute = TablaRouteImport.update({
   id: '/tabla',
@@ -41,59 +43,95 @@ const EquiposRoute = EquiposRouteImport.update({
   path: '/equipos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBootstrapAdminRoute = ApiPublicBootstrapAdminRouteImport.update({
+  id: '/api/public/bootstrap-admin',
+  path: '/api/public/bootstrap-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/equipos': typeof EquiposRoute
   '/fixture': typeof FixtureRoute
   '/goleadores': typeof GoleadoresRoute
   '/llave': typeof LlaveRoute
   '/tabla': typeof TablaRoute
+  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/equipos': typeof EquiposRoute
   '/fixture': typeof FixtureRoute
   '/goleadores': typeof GoleadoresRoute
   '/llave': typeof LlaveRoute
   '/tabla': typeof TablaRoute
+  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/equipos': typeof EquiposRoute
   '/fixture': typeof FixtureRoute
   '/goleadores': typeof GoleadoresRoute
   '/llave': typeof LlaveRoute
   '/tabla': typeof TablaRoute
+  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/equipos' | '/fixture' | '/goleadores' | '/llave' | '/tabla'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/equipos' | '/fixture' | '/goleadores' | '/llave' | '/tabla'
-  id:
-    | '__root__'
+  fullPaths:
     | '/'
+    | '/auth'
     | '/equipos'
     | '/fixture'
     | '/goleadores'
     | '/llave'
     | '/tabla'
+    | '/api/public/bootstrap-admin'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/auth'
+    | '/equipos'
+    | '/fixture'
+    | '/goleadores'
+    | '/llave'
+    | '/tabla'
+    | '/api/public/bootstrap-admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/equipos'
+    | '/fixture'
+    | '/goleadores'
+    | '/llave'
+    | '/tabla'
+    | '/api/public/bootstrap-admin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   EquiposRoute: typeof EquiposRoute
   FixtureRoute: typeof FixtureRoute
   GoleadoresRoute: typeof GoleadoresRoute
   LlaveRoute: typeof LlaveRoute
   TablaRoute: typeof TablaRoute
+  ApiPublicBootstrapAdminRoute: typeof ApiPublicBootstrapAdminRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -133,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EquiposRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -140,16 +185,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/bootstrap-admin': {
+      id: '/api/public/bootstrap-admin'
+      path: '/api/public/bootstrap-admin'
+      fullPath: '/api/public/bootstrap-admin'
+      preLoaderRoute: typeof ApiPublicBootstrapAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   EquiposRoute: EquiposRoute,
   FixtureRoute: FixtureRoute,
   GoleadoresRoute: GoleadoresRoute,
   LlaveRoute: LlaveRoute,
   TablaRoute: TablaRoute,
+  ApiPublicBootstrapAdminRoute: ApiPublicBootstrapAdminRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
