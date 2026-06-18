@@ -27,7 +27,6 @@ function AdminEquipos() {
   const [editing, setEditing] = useState<Team | null>(null);
   const [creating, setCreating] = useState(false);
   const [playerTeam, setPlayerTeam] = useState<Team | null>(null);
-  const [sportFilter, setSportFilter] = useState<"futbol" | "basquet">("futbol");
 
   const refetch = () => {
     qc.invalidateQueries({ queryKey: ["teams"] });
@@ -43,8 +42,7 @@ function AdminEquipos() {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const visibleTeams = teams.filter((t) => (t.sport ?? "futbol") === sportFilter);
-  const sportLimitReached = visibleTeams.length >= 8;
+  const limitReached = teams.length >= 8;
 
   return (
     <div className="space-y-6">
@@ -52,28 +50,18 @@ function AdminEquipos() {
         <div>
           <h1 className="font-display text-2xl font-bold text-primary">Equipos y jugadores</h1>
           <p className="text-sm text-muted-foreground">
-            {visibleTeams.length} de 8 equipos registrados en {sportFilter === "futbol" ? "Fútbol" : "Básquet"}.
+            {teams.length} de 8 equipos registrados. Los mismos equipos juegan fútbol y básquet.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-lg border border-border bg-card p-1">
-            {(["futbol", "basquet"] as const).map((s) => (
-              <button key={s} type="button" onClick={() => setSportFilter(s)}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                  sportFilter === s ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
-                }`}>
-                {s === "futbol" ? "⚽ Fútbol" : "🏀 Básquet"}
-              </button>
-            ))}
-          </div>
-          <Button variant="hero" disabled={sportLimitReached} onClick={() => setCreating(true)}>
+          <Button variant="hero" disabled={limitReached} onClick={() => setCreating(true)}>
             <Plus className="mr-2 h-4 w-4" /> Nuevo equipo
           </Button>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {visibleTeams.map((t) => {
+        {teams.map((t) => {
           const roster = players.filter((p) => p.team_id === t.id);
           return (
             <div key={t.id} className="overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)]">
@@ -82,7 +70,7 @@ function AdminEquipos() {
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-lg font-semibold leading-tight">{t.name}</p>
                   <p className="text-xs opacity-80">
-                    {(t.sport ?? "futbol") === "futbol" ? "⚽" : "🏀"} · Grupo {t.group_name ?? "-"} · {roster.length} jugadores
+                    ⚽ 🏀 · Grupo {t.group_name ?? "-"} · {roster.length} jugadores
                   </p>
                 </div>
                 <Button size="sm" variant="ghost" className="text-white hover:bg-white/10" onClick={() => setEditing(t)}>
@@ -126,14 +114,12 @@ function AdminEquipos() {
 
       <TeamDialog
         open={creating}
-        defaultSport={sportFilter}
         onOpenChange={(o) => !o && setCreating(false)}
         onDone={() => { setCreating(false); refetch(); }}
       />
       <TeamDialog
         open={!!editing}
         team={editing ?? undefined}
-        defaultSport={sportFilter}
         onOpenChange={(o) => !o && setEditing(null)}
         onDone={() => { setEditing(null); refetch(); }}
       />
@@ -148,9 +134,9 @@ function AdminEquipos() {
 }
 
 function TeamDialog({
-  open, onOpenChange, team, onDone, defaultSport,
+  open, onOpenChange, team, onDone,
 }: {
-  open: boolean; onOpenChange: (o: boolean) => void; team?: Team; onDone: () => void; defaultSport: "futbol" | "basquet";
+  open: boolean; onOpenChange: (o: boolean) => void; team?: Team; onDone: () => void;
 }) {
   const [name, setName] = useState(team?.name ?? "");
   const [captain, setCaptain] = useState(team?.captain ?? "");
@@ -158,7 +144,6 @@ function TeamDialog({
   const [email, setEmail] = useState(team?.email ?? "");
   const [color, setColor] = useState(team?.shirt_color ?? "#1e3a8a");
   const [group, setGroup] = useState<string>(team?.group_name ?? "A");
-  const [sport, setSport] = useState<"futbol" | "basquet">((team?.sport as any) ?? defaultSport);
   const [logoUrl, setLogoUrl] = useState<string | null>(team?.logo_url ?? null);
   const [uploading, setUploading] = useState(false);
 
@@ -190,7 +175,7 @@ function TeamDialog({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { name, captain, phone, email, shirt_color: color, group_name: group, logo_url: logoUrl, sport };
+    const payload = { name, captain, phone, email, shirt_color: color, group_name: group, logo_url: logoUrl };
     const { error } = team
       ? await supabase.from("teams").update(payload).eq("id", team.id)
       : await supabase.from("teams").insert(payload);
@@ -219,16 +204,6 @@ function TeamDialog({
             <div className="col-span-2">
               <Label>Nombre</Label>
               <Input required value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div className="col-span-2">
-              <Label>Deporte</Label>
-              <Select value={sport} onValueChange={(v) => setSport(v as any)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="futbol">⚽ Fútbol</SelectItem>
-                  <SelectItem value="basquet">🏀 Básquet</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             <div>
               <Label>Capitán</Label>
