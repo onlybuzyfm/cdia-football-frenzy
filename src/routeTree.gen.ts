@@ -20,6 +20,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as ApiPublicBootstrapAdminRouteImport } from './routes/api/public/bootstrap-admin'
+import { Route as AuthenticatedAdminPartidosRouteImport } from './routes/_authenticated/admin.partidos'
+import { Route as AuthenticatedAdminLlaveRouteImport } from './routes/_authenticated/admin.llave'
 import { Route as AuthenticatedAdminEquiposRouteImport } from './routes/_authenticated/admin.equipos'
 
 const TablaRoute = TablaRouteImport.update({
@@ -76,6 +78,17 @@ const ApiPublicBootstrapAdminRoute = ApiPublicBootstrapAdminRouteImport.update({
   path: '/api/public/bootstrap-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminPartidosRoute =
+  AuthenticatedAdminPartidosRouteImport.update({
+    id: '/partidos',
+    path: '/partidos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminLlaveRoute = AuthenticatedAdminLlaveRouteImport.update({
+  id: '/llave',
+  path: '/llave',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminEquiposRoute =
   AuthenticatedAdminEquiposRouteImport.update({
     id: '/equipos',
@@ -93,6 +106,8 @@ export interface FileRoutesByFullPath {
   '/tabla': typeof TablaRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/admin/equipos': typeof AuthenticatedAdminEquiposRoute
+  '/admin/llave': typeof AuthenticatedAdminLlaveRoute
+  '/admin/partidos': typeof AuthenticatedAdminPartidosRoute
   '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -105,6 +120,8 @@ export interface FileRoutesByTo {
   '/llave': typeof LlaveRoute
   '/tabla': typeof TablaRoute
   '/admin/equipos': typeof AuthenticatedAdminEquiposRoute
+  '/admin/llave': typeof AuthenticatedAdminLlaveRoute
+  '/admin/partidos': typeof AuthenticatedAdminPartidosRoute
   '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
@@ -120,6 +137,8 @@ export interface FileRoutesById {
   '/tabla': typeof TablaRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/admin/equipos': typeof AuthenticatedAdminEquiposRoute
+  '/_authenticated/admin/llave': typeof AuthenticatedAdminLlaveRoute
+  '/_authenticated/admin/partidos': typeof AuthenticatedAdminPartidosRoute
   '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
@@ -135,6 +154,8 @@ export interface FileRouteTypes {
     | '/tabla'
     | '/admin'
     | '/admin/equipos'
+    | '/admin/llave'
+    | '/admin/partidos'
     | '/api/public/bootstrap-admin'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -147,6 +168,8 @@ export interface FileRouteTypes {
     | '/llave'
     | '/tabla'
     | '/admin/equipos'
+    | '/admin/llave'
+    | '/admin/partidos'
     | '/api/public/bootstrap-admin'
     | '/admin'
   id:
@@ -161,6 +184,8 @@ export interface FileRouteTypes {
     | '/tabla'
     | '/_authenticated/admin'
     | '/_authenticated/admin/equipos'
+    | '/_authenticated/admin/llave'
+    | '/_authenticated/admin/partidos'
     | '/api/public/bootstrap-admin'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
@@ -256,6 +281,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBootstrapAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/partidos': {
+      id: '/_authenticated/admin/partidos'
+      path: '/partidos'
+      fullPath: '/admin/partidos'
+      preLoaderRoute: typeof AuthenticatedAdminPartidosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/llave': {
+      id: '/_authenticated/admin/llave'
+      path: '/llave'
+      fullPath: '/admin/llave'
+      preLoaderRoute: typeof AuthenticatedAdminLlaveRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/equipos': {
       id: '/_authenticated/admin/equipos'
       path: '/equipos'
@@ -268,11 +307,15 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminEquiposRoute: typeof AuthenticatedAdminEquiposRoute
+  AuthenticatedAdminLlaveRoute: typeof AuthenticatedAdminLlaveRoute
+  AuthenticatedAdminPartidosRoute: typeof AuthenticatedAdminPartidosRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminEquiposRoute: AuthenticatedAdminEquiposRoute,
+  AuthenticatedAdminLlaveRoute: AuthenticatedAdminLlaveRoute,
+  AuthenticatedAdminPartidosRoute: AuthenticatedAdminPartidosRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
