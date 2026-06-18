@@ -113,11 +113,13 @@ function AdminEquipos() {
       </div>
 
       <TeamDialog
+        key={editing?.id ?? "new"}
         open={creating}
         onOpenChange={(o) => !o && setCreating(false)}
         onDone={() => { setCreating(false); refetch(); }}
       />
       <TeamDialog
+        key={editing?.id ?? "edit-empty"}
         open={!!editing}
         team={editing ?? undefined}
         onOpenChange={(o) => !o && setEditing(null)}
@@ -146,15 +148,6 @@ function TeamDialog({
   const [group, setGroup] = useState<string>(team?.group_name ?? "A");
   const [logoUrl, setLogoUrl] = useState<string | null>(team?.logo_url ?? null);
   const [uploading, setUploading] = useState(false);
-
-  // reset when team changes
-  useState(() => {
-    if (team) {
-      setName(team.name); setCaptain(team.captain ?? ""); setPhone(team.phone ?? "");
-      setEmail(team.email ?? ""); setColor(team.shirt_color ?? "#1e3a8a");
-      setGroup(team.group_name ?? "A"); setLogoUrl(team.logo_url);
-    }
-  });
 
   const upload = async (file: File) => {
     setUploading(true);
