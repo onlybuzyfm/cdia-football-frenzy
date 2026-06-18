@@ -9,38 +9,250 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TablaRouteImport } from './routes/tabla'
+import { Route as LlaveRouteImport } from './routes/llave'
+import { Route as GoleadoresRouteImport } from './routes/goleadores'
+import { Route as FixtureRouteImport } from './routes/fixture'
+import { Route as EquiposRouteImport } from './routes/equipos'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as ApiPublicBootstrapAdminRouteImport } from './routes/api/public/bootstrap-admin'
+import { Route as AuthenticatedAdminPartidosRouteImport } from './routes/_authenticated/admin.partidos'
+import { Route as AuthenticatedAdminLlaveRouteImport } from './routes/_authenticated/admin.llave'
+import { Route as AuthenticatedAdminEquiposRouteImport } from './routes/_authenticated/admin.equipos'
 
+const TablaRoute = TablaRouteImport.update({
+  id: '/tabla',
+  path: '/tabla',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlaveRoute = LlaveRouteImport.update({
+  id: '/llave',
+  path: '/llave',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoleadoresRoute = GoleadoresRouteImport.update({
+  id: '/goleadores',
+  path: '/goleadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FixtureRoute = FixtureRouteImport.update({
+  id: '/fixture',
+  path: '/fixture',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquiposRoute = EquiposRouteImport.update({
+  id: '/equipos',
+  path: '/equipos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const ApiPublicBootstrapAdminRoute = ApiPublicBootstrapAdminRouteImport.update({
+  id: '/api/public/bootstrap-admin',
+  path: '/api/public/bootstrap-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminPartidosRoute =
+  AuthenticatedAdminPartidosRouteImport.update({
+    id: '/partidos',
+    path: '/partidos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminLlaveRoute = AuthenticatedAdminLlaveRouteImport.update({
+  id: '/llave',
+  path: '/llave',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminEquiposRoute =
+  AuthenticatedAdminEquiposRouteImport.update({
+    id: '/equipos',
+    path: '/equipos',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/equipos': typeof EquiposRoute
+  '/fixture': typeof FixtureRoute
+  '/goleadores': typeof GoleadoresRoute
+  '/llave': typeof LlaveRoute
+  '/tabla': typeof TablaRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/admin/equipos': typeof AuthenticatedAdminEquiposRoute
+  '/admin/llave': typeof AuthenticatedAdminLlaveRoute
+  '/admin/partidos': typeof AuthenticatedAdminPartidosRoute
+  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/equipos': typeof EquiposRoute
+  '/fixture': typeof FixtureRoute
+  '/goleadores': typeof GoleadoresRoute
+  '/llave': typeof LlaveRoute
+  '/tabla': typeof TablaRoute
+  '/admin/equipos': typeof AuthenticatedAdminEquiposRoute
+  '/admin/llave': typeof AuthenticatedAdminLlaveRoute
+  '/admin/partidos': typeof AuthenticatedAdminPartidosRoute
+  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/equipos': typeof EquiposRoute
+  '/fixture': typeof FixtureRoute
+  '/goleadores': typeof GoleadoresRoute
+  '/llave': typeof LlaveRoute
+  '/tabla': typeof TablaRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/admin/equipos': typeof AuthenticatedAdminEquiposRoute
+  '/_authenticated/admin/llave': typeof AuthenticatedAdminLlaveRoute
+  '/_authenticated/admin/partidos': typeof AuthenticatedAdminPartidosRoute
+  '/api/public/bootstrap-admin': typeof ApiPublicBootstrapAdminRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/equipos'
+    | '/fixture'
+    | '/goleadores'
+    | '/llave'
+    | '/tabla'
+    | '/admin'
+    | '/admin/equipos'
+    | '/admin/llave'
+    | '/admin/partidos'
+    | '/api/public/bootstrap-admin'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/equipos'
+    | '/fixture'
+    | '/goleadores'
+    | '/llave'
+    | '/tabla'
+    | '/admin/equipos'
+    | '/admin/llave'
+    | '/admin/partidos'
+    | '/api/public/bootstrap-admin'
+    | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/equipos'
+    | '/fixture'
+    | '/goleadores'
+    | '/llave'
+    | '/tabla'
+    | '/_authenticated/admin'
+    | '/_authenticated/admin/equipos'
+    | '/_authenticated/admin/llave'
+    | '/_authenticated/admin/partidos'
+    | '/api/public/bootstrap-admin'
+    | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  EquiposRoute: typeof EquiposRoute
+  FixtureRoute: typeof FixtureRoute
+  GoleadoresRoute: typeof GoleadoresRoute
+  LlaveRoute: typeof LlaveRoute
+  TablaRoute: typeof TablaRoute
+  ApiPublicBootstrapAdminRoute: typeof ApiPublicBootstrapAdminRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tabla': {
+      id: '/tabla'
+      path: '/tabla'
+      fullPath: '/tabla'
+      preLoaderRoute: typeof TablaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llave': {
+      id: '/llave'
+      path: '/llave'
+      fullPath: '/llave'
+      preLoaderRoute: typeof LlaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/goleadores': {
+      id: '/goleadores'
+      path: '/goleadores'
+      fullPath: '/goleadores'
+      preLoaderRoute: typeof GoleadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fixture': {
+      id: '/fixture'
+      path: '/fixture'
+      fullPath: '/fixture'
+      preLoaderRoute: typeof FixtureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipos': {
+      id: '/equipos'
+      path: '/equipos'
+      fullPath: '/equipos'
+      preLoaderRoute: typeof EquiposRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +260,90 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/api/public/bootstrap-admin': {
+      id: '/api/public/bootstrap-admin'
+      path: '/api/public/bootstrap-admin'
+      fullPath: '/api/public/bootstrap-admin'
+      preLoaderRoute: typeof ApiPublicBootstrapAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin/partidos': {
+      id: '/_authenticated/admin/partidos'
+      path: '/partidos'
+      fullPath: '/admin/partidos'
+      preLoaderRoute: typeof AuthenticatedAdminPartidosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/llave': {
+      id: '/_authenticated/admin/llave'
+      path: '/llave'
+      fullPath: '/admin/llave'
+      preLoaderRoute: typeof AuthenticatedAdminLlaveRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/equipos': {
+      id: '/_authenticated/admin/equipos'
+      path: '/equipos'
+      fullPath: '/admin/equipos'
+      preLoaderRoute: typeof AuthenticatedAdminEquiposRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminEquiposRoute: typeof AuthenticatedAdminEquiposRoute
+  AuthenticatedAdminLlaveRoute: typeof AuthenticatedAdminLlaveRoute
+  AuthenticatedAdminPartidosRoute: typeof AuthenticatedAdminPartidosRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminEquiposRoute: AuthenticatedAdminEquiposRoute,
+  AuthenticatedAdminLlaveRoute: AuthenticatedAdminLlaveRoute,
+  AuthenticatedAdminPartidosRoute: AuthenticatedAdminPartidosRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  EquiposRoute: EquiposRoute,
+  FixtureRoute: FixtureRoute,
+  GoleadoresRoute: GoleadoresRoute,
+  LlaveRoute: LlaveRoute,
+  TablaRoute: TablaRoute,
+  ApiPublicBootstrapAdminRoute: ApiPublicBootstrapAdminRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
