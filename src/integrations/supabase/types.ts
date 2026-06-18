@@ -184,7 +184,6 @@ export type Database = {
           name: string
           phone: string | null
           shirt_color: string | null
-          sport: Database["public"]["Enums"]["sport_kind"]
           updated_at: string
         }
         Insert: {
@@ -197,7 +196,6 @@ export type Database = {
           name: string
           phone?: string | null
           shirt_color?: string | null
-          sport?: Database["public"]["Enums"]["sport_kind"]
           updated_at?: string
         }
         Update: {
@@ -210,7 +208,6 @@ export type Database = {
           name?: string
           phone?: string | null
           shirt_color?: string | null
-          sport?: Database["public"]["Enums"]["sport_kind"]
           updated_at?: string
         }
         Relationships: []
