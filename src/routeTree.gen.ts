@@ -19,6 +19,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as ApiPublicSeedAccountsRouteImport } from './routes/api/public/seed-accounts'
 import { Route as AuthenticatedAdminPartidosRouteImport } from './routes/_authenticated/admin.partidos'
 import { Route as AuthenticatedAdminLlaveRouteImport } from './routes/_authenticated/admin.llave'
 import { Route as AuthenticatedAdminEquiposRouteImport } from './routes/_authenticated/admin.equipos'
@@ -72,6 +73,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const ApiPublicSeedAccountsRoute = ApiPublicSeedAccountsRouteImport.update({
+  id: '/api/public/seed-accounts',
+  path: '/api/public/seed-accounts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminPartidosRoute =
   AuthenticatedAdminPartidosRouteImport.update({
     id: '/partidos',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/admin/equipos': typeof AuthenticatedAdminEquiposRoute
   '/admin/llave': typeof AuthenticatedAdminLlaveRoute
   '/admin/partidos': typeof AuthenticatedAdminPartidosRoute
+  '/api/public/seed-accounts': typeof ApiPublicSeedAccountsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/admin/equipos': typeof AuthenticatedAdminEquiposRoute
   '/admin/llave': typeof AuthenticatedAdminLlaveRoute
   '/admin/partidos': typeof AuthenticatedAdminPartidosRoute
+  '/api/public/seed-accounts': typeof ApiPublicSeedAccountsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/equipos': typeof AuthenticatedAdminEquiposRoute
   '/_authenticated/admin/llave': typeof AuthenticatedAdminLlaveRoute
   '/_authenticated/admin/partidos': typeof AuthenticatedAdminPartidosRoute
+  '/api/public/seed-accounts': typeof ApiPublicSeedAccountsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/admin/equipos'
     | '/admin/llave'
     | '/admin/partidos'
+    | '/api/public/seed-accounts'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/admin/equipos'
     | '/admin/llave'
     | '/admin/partidos'
+    | '/api/public/seed-accounts'
     | '/admin'
   id:
     | '__root__'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/equipos'
     | '/_authenticated/admin/llave'
     | '/_authenticated/admin/partidos'
+    | '/api/public/seed-accounts'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -187,6 +199,7 @@ export interface RootRouteChildren {
   GoleadoresRoute: typeof GoleadoresRoute
   LlaveRoute: typeof LlaveRoute
   TablaRoute: typeof TablaRoute
+  ApiPublicSeedAccountsRoute: typeof ApiPublicSeedAccountsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -261,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/seed-accounts': {
+      id: '/api/public/seed-accounts'
+      path: '/api/public/seed-accounts'
+      fullPath: '/api/public/seed-accounts'
+      preLoaderRoute: typeof ApiPublicSeedAccountsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/partidos': {
       id: '/_authenticated/admin/partidos'
       path: '/partidos'
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   GoleadoresRoute: GoleadoresRoute,
   LlaveRoute: LlaveRoute,
   TablaRoute: TablaRoute,
+  ApiPublicSeedAccountsRoute: ApiPublicSeedAccountsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
