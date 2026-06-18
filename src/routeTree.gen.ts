@@ -9,8 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TablaRouteImport } from './routes/tabla'
+import { Route as LlaveRouteImport } from './routes/llave'
+import { Route as GoleadoresRouteImport } from './routes/goleadores'
+import { Route as FixtureRouteImport } from './routes/fixture'
+import { Route as EquiposRouteImport } from './routes/equipos'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TablaRoute = TablaRouteImport.update({
+  id: '/tabla',
+  path: '/tabla',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlaveRoute = LlaveRouteImport.update({
+  id: '/llave',
+  path: '/llave',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoleadoresRoute = GoleadoresRouteImport.update({
+  id: '/goleadores',
+  path: '/goleadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FixtureRoute = FixtureRouteImport.update({
+  id: '/fixture',
+  path: '/fixture',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquiposRoute = EquiposRouteImport.update({
+  id: '/equipos',
+  path: '/equipos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +49,90 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/equipos': typeof EquiposRoute
+  '/fixture': typeof FixtureRoute
+  '/goleadores': typeof GoleadoresRoute
+  '/llave': typeof LlaveRoute
+  '/tabla': typeof TablaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/equipos': typeof EquiposRoute
+  '/fixture': typeof FixtureRoute
+  '/goleadores': typeof GoleadoresRoute
+  '/llave': typeof LlaveRoute
+  '/tabla': typeof TablaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/equipos': typeof EquiposRoute
+  '/fixture': typeof FixtureRoute
+  '/goleadores': typeof GoleadoresRoute
+  '/llave': typeof LlaveRoute
+  '/tabla': typeof TablaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/equipos' | '/fixture' | '/goleadores' | '/llave' | '/tabla'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/equipos' | '/fixture' | '/goleadores' | '/llave' | '/tabla'
+  id:
+    | '__root__'
+    | '/'
+    | '/equipos'
+    | '/fixture'
+    | '/goleadores'
+    | '/llave'
+    | '/tabla'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EquiposRoute: typeof EquiposRoute
+  FixtureRoute: typeof FixtureRoute
+  GoleadoresRoute: typeof GoleadoresRoute
+  LlaveRoute: typeof LlaveRoute
+  TablaRoute: typeof TablaRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tabla': {
+      id: '/tabla'
+      path: '/tabla'
+      fullPath: '/tabla'
+      preLoaderRoute: typeof TablaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llave': {
+      id: '/llave'
+      path: '/llave'
+      fullPath: '/llave'
+      preLoaderRoute: typeof LlaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/goleadores': {
+      id: '/goleadores'
+      path: '/goleadores'
+      fullPath: '/goleadores'
+      preLoaderRoute: typeof GoleadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fixture': {
+      id: '/fixture'
+      path: '/fixture'
+      fullPath: '/fixture'
+      preLoaderRoute: typeof FixtureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipos': {
+      id: '/equipos'
+      path: '/equipos'
+      fullPath: '/equipos'
+      preLoaderRoute: typeof EquiposRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +145,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EquiposRoute: EquiposRoute,
+  FixtureRoute: FixtureRoute,
+  GoleadoresRoute: GoleadoresRoute,
+  LlaveRoute: LlaveRoute,
+  TablaRoute: TablaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
