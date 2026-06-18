@@ -78,6 +78,7 @@ export type Database = {
           notes: string | null
           phase: Database["public"]["Enums"]["match_phase"]
           played: boolean
+          sport: Database["public"]["Enums"]["sport_kind"]
           updated_at: string
         }
         Insert: {
@@ -94,6 +95,7 @@ export type Database = {
           notes?: string | null
           phase?: Database["public"]["Enums"]["match_phase"]
           played?: boolean
+          sport?: Database["public"]["Enums"]["sport_kind"]
           updated_at?: string
         }
         Update: {
@@ -110,6 +112,7 @@ export type Database = {
           notes?: string | null
           phase?: Database["public"]["Enums"]["match_phase"]
           played?: boolean
+          sport?: Database["public"]["Enums"]["sport_kind"]
           updated_at?: string
         }
         Relationships: [
@@ -181,6 +184,7 @@ export type Database = {
           name: string
           phone: string | null
           shirt_color: string | null
+          sport: Database["public"]["Enums"]["sport_kind"]
           updated_at: string
         }
         Insert: {
@@ -193,6 +197,7 @@ export type Database = {
           name: string
           phone?: string | null
           shirt_color?: string | null
+          sport?: Database["public"]["Enums"]["sport_kind"]
           updated_at?: string
         }
         Update: {
@@ -205,6 +210,7 @@ export type Database = {
           name?: string
           phone?: string | null
           shirt_color?: string | null
+          sport?: Database["public"]["Enums"]["sport_kind"]
           updated_at?: string
         }
         Relationships: []
@@ -261,6 +267,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_score: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -271,8 +278,9 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      app_role: "admin"
+      app_role: "admin" | "scorer"
       match_phase: "group" | "semifinal" | "third_place" | "final"
+      sport_kind: "futbol" | "basquet"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -400,8 +408,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin"],
+      app_role: ["admin", "scorer"],
       match_phase: ["group", "semifinal", "third_place", "final"],
+      sport_kind: ["futbol", "basquet"],
     },
   },
 } as const

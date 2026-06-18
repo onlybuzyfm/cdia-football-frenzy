@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Shield, Trophy } from "lucide-react";
 
+const DOMAIN = "cdia.local";
+
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Acceso administrador · Juego CDIA" },
-      { name: "description", content: "Acceso para el administrador del torneo." },
+      { title: "Acceso · Juego CDIA" },
+      { name: "description", content: "Acceso para administradores y ayudantes del torneo." },
     ],
   }),
   component: AuthPage,
@@ -19,16 +21,13 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/public/bootstrap-admin")
-      .then((r) => r.json())
-      .then((d) => setHasAdmin(!!d.hasAdmin))
-      .catch(() => setHasAdmin(true));
+    // Idempotent seed of admin + 5 scorers on first visit
+    fetch("/api/public/seed-accounts", { method: "POST" }).catch(() => {});
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/admin" });
     });
@@ -38,16 +37,8 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (hasAdmin === false) {
-        const res = await fetch("/api/public/bootstrap-admin", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? "Error");
-        toast.success("Administrador creado. Iniciando sesión…");
-      }
+      const cleaned = username.trim().toLowerCase();
+      const email = cleaned.includes("@") ? cleaned : `${cleaned}@${DOMAIN}`;
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       toast.success("Bienvenido");
@@ -64,26 +55,24 @@ function AuthPage() {
       <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-[image:var(--gradient-accent)] text-white shadow-[var(--shadow-elegant)]">
         <Trophy className="h-7 w-7" />
       </div>
-      <h1 className="font-display text-2xl font-bold text-primary">
-        {hasAdmin === false ? "Crear administrador" : "Acceso administrador"}
-      </h1>
+      <h1 className="font-display text-2xl font-bold text-primary">Acceso al torneo</h1>
       <p className="mb-6 text-center text-sm text-muted-foreground">
-        {hasAdmin === false
-          ? "Define el usuario y contraseña del administrador del torneo."
-          : "Sólo el administrador puede modificar la información del torneo."}
+        Ingresá con tu <strong>usuario</strong> y contraseña. Administradores cargan equipos y ayudantes registran resultados.
       </p>
       <form onSubmit={onSubmit} className="w-full space-y-4 rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
         <div className="space-y-1.5">
-          <Label htmlFor="email">Correo electrónico</Label>
-          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Label htmlFor="username">Usuario</Label>
+          <Input id="username" autoComplete="username" required value={username}
+            onChange={(e) => setUsername(e.target.value)} placeholder="only_buzy" />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">Contraseña</Label>
-          <Input id="password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Input id="password" type="password" autoComplete="current-password" required minLength={8}
+            value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
-        <Button type="submit" variant="hero" className="w-full" disabled={loading || hasAdmin === null}>
+        <Button type="submit" variant="hero" className="w-full" disabled={loading}>
           <Shield className="mr-2 h-4 w-4" />
-          {loading ? "Procesando…" : hasAdmin === false ? "Crear y entrar" : "Iniciar sesión"}
+          {loading ? "Procesando…" : "Iniciar sesión"}
         </Button>
       </form>
     </div>
