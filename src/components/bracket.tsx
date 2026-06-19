@@ -1,4 +1,5 @@
 import type { Match, Team } from "@/lib/tournament";
+import type { Sport } from "@/lib/tournament";
 import { TeamLogo } from "@/components/team-logo";
 import { Trophy } from "lucide-react";
 
@@ -46,15 +47,18 @@ function MatchCard({
 export function Bracket({
   teams,
   matches,
+  sport,
 }: {
   teams: Team[];
   matches: Match[];
+  sport?: Sport;
 }) {
+  const filtered = sport ? matches.filter((m) => m.sport === sport) : matches;
   const byId = new Map(teams.map((t) => [t.id, t]));
-  const semi1 = matches.find((m) => m.phase === "semifinal" && m.match_order === 1);
-  const semi2 = matches.find((m) => m.phase === "semifinal" && m.match_order === 2);
-  const third = matches.find((m) => m.phase === "third_place");
-  const final = matches.find((m) => m.phase === "final");
+  const semi1 = filtered.find((m) => m.phase === "semifinal" && m.match_order === 1);
+  const semi2 = filtered.find((m) => m.phase === "semifinal" && m.match_order === 2);
+  const third = filtered.find((m) => m.phase === "third_place");
+  const final = filtered.find((m) => m.phase === "final");
 
   const winnerOf = (m?: Match) => {
     if (!m?.played || m.home_score == null || m.away_score == null) return null;

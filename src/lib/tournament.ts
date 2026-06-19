@@ -18,7 +18,8 @@ export interface StandingRow {
 export function computeStandings(
   teams: Team[],
   matches: Match[],
-  group: "A" | "B"
+  group: "A" | "B",
+  sport?: Sport
 ): StandingRow[] {
   const groupTeams = teams.filter((t) => t.group_name === group);
   const rows = new Map<string, StandingRow>();
@@ -27,6 +28,7 @@ export function computeStandings(
   }
   const groupMatches = matches.filter(
     (m) => m.phase === "group" && m.group_name === group && m.played && m.home_team_id && m.away_team_id
+      && (!sport || m.sport === sport)
   );
   for (const m of groupMatches) {
     const h = rows.get(m.home_team_id!);
@@ -130,9 +132,9 @@ export function scheduleGroupPhase(matches: ScheduledMatch[]): ScheduledMatch[] 
   return seq.map((i) => matches[i]);
 }
 
-export function getQualifiers(teams: Team[], matches: Match[]) {
-  const a = computeStandings(teams, matches, "A");
-  const b = computeStandings(teams, matches, "B");
+export function getQualifiers(teams: Team[], matches: Match[], sport?: Sport) {
+  const a = computeStandings(teams, matches, "A", sport);
+  const b = computeStandings(teams, matches, "B", sport);
   return {
     A1: a[0]?.team ?? null,
     A2: a[1]?.team ?? null,
