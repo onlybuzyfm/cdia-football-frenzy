@@ -63,7 +63,7 @@ function AuthPage() {
         <div className="space-y-1.5">
           <Label htmlFor="username">Usuario</Label>
           <Input id="username" autoComplete="username" required value={username}
-            onChange={(e) => setUsername(e.target.value)} placeholder="only_buzy" />
+            onChange={(e) => setUsername(e.target.value)} placeholder="usuario" />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">Contraseña</Label>
