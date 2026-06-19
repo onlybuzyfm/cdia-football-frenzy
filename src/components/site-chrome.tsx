@@ -98,16 +98,38 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              to={user && isAdmin ? "/admin" : "/auth"}
-              onClick={() => setOpen(false)}
-              className={cn(
-                "mt-1 rounded-md px-3 py-2 text-sm font-semibold",
-                "bg-[image:var(--gradient-accent)] text-white"
-              )}
-            >
-              {user && isAdmin ? "Panel admin" : "Acceso admin"}
-            </Link>
+            {user ? (
+              <>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setOpen(false)}
+                    className="mt-1 rounded-md px-3 py-2 text-sm font-semibold bg-[image:var(--gradient-accent)] text-white"
+                  >
+                    Panel admin
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    supabase.auth.signOut().then(() => {
+                      window.location.href = "/";
+                    });
+                  }}
+                  className="mt-1 rounded-md px-3 py-2 text-sm font-semibold bg-white/10 text-white hover:bg-white/20"
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/auth"
+                onClick={() => setOpen(false)}
+                className="mt-1 rounded-md px-3 py-2 text-sm font-semibold bg-[image:var(--gradient-accent)] text-white"
+              >
+                Acceso admin
+              </Link>
+            )}
           </nav>
         </div>
       )}
