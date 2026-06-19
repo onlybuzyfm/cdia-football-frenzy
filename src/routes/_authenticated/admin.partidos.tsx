@@ -13,6 +13,7 @@ import { TeamLogo } from "@/components/team-logo";
 import type { Tables } from "@/integrations/supabase/types";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
+
 export const Route = createFileRoute("/_authenticated/admin/partidos")({
   component: AdminPartidos,
 });
@@ -39,16 +40,13 @@ function AdminPartidos() {
       if (delErr) return toast.error(delErr.message);
     }
     const all: ScheduledMatch[] = [];
-    for (const sport of ["futbol", "basquet"] as const) {
-      for (const [group, list] of [["A", groupA], ["B", groupB]] as const) {
-        const fx = generateRoundRobin(list.map((t) => t.id));
-        fx.forEach((f) => all.push({ sport, group, home: f.home, away: f.away }));
-      }
+    for (const [group, list] of [["A", groupA], ["B", groupB]] as const) {
+      const fx = generateRoundRobin(list.map((t) => t.id));
+      fx.forEach((f) => all.push({ group, home: f.home, away: f.away }));
     }
     const scheduled = scheduleGroupPhase(all);
     const rows = scheduled.map((m, i) => ({
       phase: "group" as const,
-      sport: m.sport,
       group_name: m.group,
       home_team_id: m.home,
       away_team_id: m.away,
@@ -72,34 +70,26 @@ function AdminPartidos() {
         </Button>
       </div>
 
-      <Tabs defaultValue="futbol" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="futbol">Fútbol</TabsTrigger>
-          <TabsTrigger value="basquet">Básquet</TabsTrigger>
-        </TabsList>
-        {(["futbol", "basquet"] as const).map((sport) => (
-          <TabsContent key={sport} value={sport} className="space-y-6">
-            {(["A", "B"] as const).map((g) => {
-              const list = groupMatches.filter((m) => m.group_name === g && m.sport === sport);
-              return (
-                <section key={`${sport}-${g}`}>
-                  <h2 className="mb-2 font-display text-lg font-semibold text-secondary">
-                    Grupo {g}
-                  </h2>
-                  <div className="space-y-2">
-                    {list.map((m) => (
-                      <MatchRow key={m.id} match={m} teams={teams} onChanged={refetch} />
-                    ))}
-                    {list.length === 0 && (
-                      <p className="text-sm text-muted-foreground">Sin partidos generados.</p>
-                    )}
-                  </div>
-                </section>
-              );
-            })}
-          </TabsContent>
-        ))}
-      </Tabs>
+      <div className="space-y-6">
+        {(["A", "B"] as const).map((g) => {
+          const list = groupMatches.filter((m) => m.group_name === g);
+          return (
+            <section key={g}>
+              <h2 className="mb-2 font-display text-lg font-semibold text-secondary">
+                Grupo {g}
+              </h2>
+              <div className="space-y-2">
+                {list.map((m) => (
+                  <MatchRow key={m.id} match={m} teams={teams} onChanged={refetch} />
+                ))}
+                {list.length === 0 && (
+                  <p className="text-sm text-muted-foreground">Sin partidos generados.</p>
+                )}
+              </div>
+            </section>
+          );
+        })}
+      </div>
     </div>
   );
 }
