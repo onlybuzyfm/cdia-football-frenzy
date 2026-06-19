@@ -1,0 +1,1 @@
+CREATE POLICY "matches scorer del" ON public.matches FOR DELETE TO authenticated USING (can_score());
