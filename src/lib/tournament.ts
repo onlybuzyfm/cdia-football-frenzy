@@ -18,8 +18,7 @@ export interface StandingRow {
 export function computeStandings(
   teams: Team[],
   matches: Match[],
-  group: "A" | "B",
-  sport?: Sport
+  group: "A" | "B"
 ): StandingRow[] {
   const groupTeams = teams.filter((t) => t.group_name === group);
   const rows = new Map<string, StandingRow>();
@@ -28,7 +27,6 @@ export function computeStandings(
   }
   const groupMatches = matches.filter(
     (m) => m.phase === "group" && m.group_name === group && m.played && m.home_team_id && m.away_team_id
-      && (!sport || m.sport === sport)
   );
   for (const m of groupMatches) {
     const h = rows.get(m.home_team_id!);
@@ -78,10 +76,7 @@ export function generateRoundRobin(teamIds: string[]): Array<{ home: string; awa
   ];
 }
 
-export type Sport = "futbol" | "basquet";
-
 export interface ScheduledMatch {
-  sport: Sport;
   group: "A" | "B";
   home: string;
   away: string;
@@ -110,14 +105,6 @@ export function scheduleGroupPhase(matches: ScheduledMatch[]): ScheduledMatch[] 
       if (prev && shares(matches[i], prev)) continue;
       candidates.push(i);
     }
-    // Prefer alternating sport
-    if (prev) {
-      candidates.sort((a, b) => {
-        const aDiff = matches[a].sport !== prev.sport ? 0 : 1;
-        const bDiff = matches[b].sport !== prev.sport ? 0 : 1;
-        return aDiff - bDiff;
-      });
-    }
     for (const i of candidates) {
       used[i] = true;
       seq.push(i);
@@ -132,9 +119,9 @@ export function scheduleGroupPhase(matches: ScheduledMatch[]): ScheduledMatch[] 
   return seq.map((i) => matches[i]);
 }
 
-export function getQualifiers(teams: Team[], matches: Match[], sport?: Sport) {
-  const a = computeStandings(teams, matches, "A", sport);
-  const b = computeStandings(teams, matches, "B", sport);
+export function getQualifiers(teams: Team[], matches: Match[]) {
+  const a = computeStandings(teams, matches, "A");
+  const b = computeStandings(teams, matches, "B");
   return {
     A1: a[0]?.team ?? null,
     A2: a[1]?.team ?? null,
