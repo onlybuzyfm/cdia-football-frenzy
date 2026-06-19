@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useAuth } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 const publicNav = [
   { to: "/", label: "Inicio" },
@@ -45,13 +44,15 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {user && isAdmin ? (
+          {user ? (
             <>
-              <Link to="/admin" className="hidden sm:inline-flex">
-                <Button size="sm" variant="hero">
-                  <Shield className="mr-1.5 h-4 w-4" /> Admin
-                </Button>
-              </Link>
+              {isAdmin && (
+                <Link to="/admin" className="hidden sm:inline-flex">
+                  <Button size="sm" variant="hero">
+                    <Shield className="mr-1.5 h-4 w-4" /> Admin
+                  </Button>
+                </Link>
+              )}
               <Button
                 size="sm"
                 variant="ghost"
@@ -96,16 +97,38 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              to={user && isAdmin ? "/admin" : "/auth"}
-              onClick={() => setOpen(false)}
-              className={cn(
-                "mt-1 rounded-md px-3 py-2 text-sm font-semibold",
-                "bg-[image:var(--gradient-accent)] text-white"
-              )}
-            >
-              {user && isAdmin ? "Panel admin" : "Acceso admin"}
-            </Link>
+            {user ? (
+              <>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setOpen(false)}
+                    className="mt-1 rounded-md px-3 py-2 text-sm font-semibold bg-[image:var(--gradient-accent)] text-white"
+                  >
+                    Panel admin
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    supabase.auth.signOut().then(() => {
+                      window.location.href = "/";
+                    });
+                  }}
+                  className="mt-1 rounded-md px-3 py-2 text-sm font-semibold bg-white/10 text-white hover:bg-white/20"
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/auth"
+                onClick={() => setOpen(false)}
+                className="mt-1 rounded-md px-3 py-2 text-sm font-semibold bg-[image:var(--gradient-accent)] text-white"
+              >
+                Acceso admin
+              </Link>
+            )}
           </nav>
         </div>
       )}
@@ -117,7 +140,7 @@ export function SiteFooter() {
   return (
     <footer className="mt-12 border-t border-border bg-secondary text-secondary-foreground/85">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm sm:flex-row">
-        <p className="font-display text-base text-white">Juego CDIA · Segunda Edición</p>
+        <p className="font-display text-base text-white">Campeonato CDIA · Segunda Edición</p>
         <p className="text-secondary-foreground/70">
           Desarrollado por <span className="font-semibold text-accent">PerceptIA</span>
         </p>
