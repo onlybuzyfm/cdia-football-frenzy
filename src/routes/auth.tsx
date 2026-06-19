@@ -66,9 +66,9 @@ function AuthPage() {
             onChange={(e) => setUsername(e.target.value)} placeholder="usuario" />
         </div>
         <div className="space-y-1.5">
-          <Input id="password" type="password" autoComplete="current-password" required minLength={8}
-            value={password} onChange={(e) => setPassword(e.target.value)} />
           <Label htmlFor="password">Contraseña</Label>
+          <Input id="password" type="password" autoComplete="current-password" required minLength={8}
+            value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" />
         </div>
         <Button type="submit" variant="hero" className="w-full" disabled={loading}>
           <Shield className="mr-2 h-4 w-4" />
