@@ -45,13 +45,15 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {user && isAdmin ? (
+          {user ? (
             <>
-              <Link to="/admin" className="hidden sm:inline-flex">
-                <Button size="sm" variant="hero">
-                  <Shield className="mr-1.5 h-4 w-4" /> Admin
-                </Button>
-              </Link>
+              {isAdmin && (
+                <Link to="/admin" className="hidden sm:inline-flex">
+                  <Button size="sm" variant="hero">
+                    <Shield className="mr-1.5 h-4 w-4" /> Admin
+                  </Button>
+                </Link>
+              )}
               <Button
                 size="sm"
                 variant="ghost"
