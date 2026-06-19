@@ -4,8 +4,6 @@ import { matchesQuery, teamsQuery, awardsQuery, playersQuery } from "@/lib/queri
 import { Bracket } from "@/components/bracket";
 import { getQualifiers } from "@/lib/tournament";
 import { Star } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import type { Sport } from "@/lib/tournament";
 
 export const Route = createFileRoute("/llave")({
   head: () => ({
@@ -23,15 +21,19 @@ function LlavePage() {
   const players = useQuery(playersQuery).data ?? [];
   const awards = useQuery(awardsQuery).data;
 
-  const SportTab = ({ sport, label }: { sport: Sport; label: string }) => {
-    const q = getQualifiers(teams, matches, sport);
-    const mvpKey = sport === "futbol" ? "mvp_futbol_player_id" : "mvp_basquet_player_id";
-    const mvpId = (awards as any)?.[mvpKey];
-    const mvp = players.find((p) => p.id === mvpId);
-    const mvpTeam = teams.find((t) => t.id === mvp?.team_id);
+  const q = getQualifiers(teams, matches);
+  const mvpId = (awards as any)?.mvp_futbol_player_id;
+  const mvp = players.find((p) => p.id === mvpId);
+  const mvpTeam = teams.find((t) => t.id === mvp?.team_id);
 
-    return (
-      <TabsContent key={sport} value={sport} className="space-y-6">
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-10">
+      <header className="mb-6">
+        <h1 className="font-display text-3xl font-bold text-primary">Llave final</h1>
+        <p className="text-muted-foreground">Cruces: 1°A vs 2°B y 1°B vs 2°A.</p>
+      </header>
+
+      <div className="space-y-6">
         <div className="mb-4 grid gap-3 sm:grid-cols-4">
           {[
             { l: "1° Grupo A", t: q.A1 },
@@ -47,38 +49,20 @@ function LlavePage() {
         </div>
 
         <div className="rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-          <Bracket teams={teams} matches={matches} sport={sport} />
+          <Bracket teams={teams} matches={matches} />
         </div>
 
         {mvp && (
           <div className="flex items-center gap-4 rounded-xl border border-accent/40 bg-[image:var(--gradient-accent)] p-5 text-white shadow-[var(--shadow-elegant)]">
             <Star className="h-10 w-10" />
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest">MVP {label}</p>
+              <p className="text-xs font-semibold uppercase tracking-widest">MVP</p>
               <p className="font-display text-2xl font-bold">{mvp.full_name}</p>
               {mvpTeam && <p className="text-sm opacity-90">{mvpTeam.name}</p>}
             </div>
           </div>
         )}
-      </TabsContent>
-    );
-  };
-
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-10">
-      <header className="mb-6">
-        <h1 className="font-display text-3xl font-bold text-primary">Llave final</h1>
-        <p className="text-muted-foreground">Cruces: 1°A vs 2°B y 1°B vs 2°A.</p>
-      </header>
-
-      <Tabs defaultValue="futbol" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="futbol">Fútbol</TabsTrigger>
-          <TabsTrigger value="basquet">Básquet</TabsTrigger>
-        </TabsList>
-        <SportTab sport="futbol" label="de fútbol" />
-        <SportTab sport="basquet" label="de básquet" />
-      </Tabs>
+      </div>
     </div>
   );
 }
