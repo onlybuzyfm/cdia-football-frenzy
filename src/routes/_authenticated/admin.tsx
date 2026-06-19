@@ -1,5 +1,7 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { LayoutDashboard, Users, Calendar, Trophy } from "lucide-react";
+import { useAuth } from "@/lib/use-auth";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -12,13 +14,25 @@ const tabs: Tab[] = [
   { to: "/admin/partidos", icon: Calendar, label: "Fixture y resultados" },
   { to: "/admin/llave", icon: Trophy, label: "Llave final y MVP" },
 ];
+const scorerTabs: Tab[] = [
+  { to: "/admin/partidos", icon: Calendar, label: "Fixture y resultados" },
+];
 
 function AdminLayout() {
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => {
+    if (!isAdmin && pathname !== "/admin/partidos") {
+      navigate({ to: "/admin/partidos" });
+    }
+  }, [isAdmin, pathname, navigate]);
+  const visibleTabs = isAdmin ? tabs : scorerTabs;
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
       <div className="mb-4 overflow-x-auto">
         <nav className="flex gap-1 rounded-xl border border-border bg-card p-1 shadow-[var(--shadow-card)]">
-          {tabs.map((t) => (
+          {visibleTabs.map((t) => (
             <Link
               key={t.to}
               to={t.to as any}
