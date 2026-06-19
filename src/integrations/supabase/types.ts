@@ -215,20 +215,40 @@ export type Database = {
       tournament_awards: {
         Row: {
           id: string
+          mvp_basquet_player_id: string | null
+          mvp_futbol_player_id: string | null
           mvp_player_id: string | null
           updated_at: string
         }
         Insert: {
           id?: string
+          mvp_basquet_player_id?: string | null
+          mvp_futbol_player_id?: string | null
           mvp_player_id?: string | null
           updated_at?: string
         }
         Update: {
           id?: string
+          mvp_basquet_player_id?: string | null
+          mvp_futbol_player_id?: string | null
           mvp_player_id?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tournament_awards_mvp_basquet_player_id_fkey"
+            columns: ["mvp_basquet_player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_awards_mvp_futbol_player_id_fkey"
+            columns: ["mvp_futbol_player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tournament_awards_mvp_player_id_fkey"
             columns: ["mvp_player_id"]
