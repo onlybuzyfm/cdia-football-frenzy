@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { teamsQuery, matchesQuery, playersQuery, awardsQuery, goalsQuery } from "@/lib/queries";
-import { getQualifiers } from "@/lib/tournament";
+import { getQualifiers, type Sport } from "@/lib/tournament";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import { Sparkles, Save, Star, Goal, Trash2 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { TeamLogo } from "@/components/team-logo";
 import { Bracket } from "@/components/bracket";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/admin/llave")({
   component: AdminLlave,
@@ -28,27 +29,28 @@ function AdminLlave() {
   const goals = useQuery(goalsQuery).data ?? [];
   const awards = useQuery(awardsQuery).data;
 
-  const q = useMemo(() => getQualifiers(teams, matches), [teams, matches]);
   const refetch = () => {
     qc.invalidateQueries({ queryKey: ["matches"] });
     qc.invalidateQueries({ queryKey: ["awards"] });
     qc.invalidateQueries({ queryKey: ["goals"] });
   };
 
-  const generateKnockout = async () => {
+  const generateKnockout = async (sport: Sport) => {
+    const q = useMemo(() => getQualifiers(teams, matches, sport), [teams, matches, sport]);
     if (!q.A1 || !q.A2 || !q.B1 || !q.B2) {
       return toast.error("Termina la fase de grupos para conocer a los clasificados.");
     }
-    if (matches.some((m) => m.phase !== "group")) {
-      if (!confirm("Esto reemplaza semifinales, 3er lugar y final actuales. ¿Continuar?")) return;
-      const { error } = await supabase.from("matches").delete().in("phase", ["semifinal", "third_place", "final"]);
+    const hasKnockout = matches.some((m) => m.phase !== "group" && m.sport === sport);
+    if (hasKnockout) {
+      if (!confirm(`Esto reemplaza semifinales, 3er lugar y final de ${sport}. ¿Continuar?`)) return;
+      const { error } = await supabase.from("matches").delete().in("phase", ["semifinal", "third_place", "final"]).eq("sport", sport);
       if (error) return toast.error(error.message);
     }
     const rows = [
-      { phase: "semifinal", match_order: 1, home_team_id: q.A1.id, away_team_id: q.B2.id },
-      { phase: "semifinal", match_order: 2, home_team_id: q.B1.id, away_team_id: q.A2.id },
-      { phase: "third_place", match_order: 1, home_team_id: null, away_team_id: null },
-      { phase: "final", match_order: 1, home_team_id: null, away_team_id: null },
+      { phase: "semifinal" as const, match_order: 1, home_team_id: q.A1.id, away_team_id: q.B2.id, sport },
+      { phase: "semifinal" as const, match_order: 2, home_team_id: q.B1.id, away_team_id: q.A2.id, sport },
+      { phase: "third_place" as const, match_order: 1, home_team_id: null, away_team_id: null, sport },
+      { phase: "final" as const, match_order: 1, home_team_id: null, away_team_id: null, sport },
     ];
     const { error } = await supabase.from("matches").insert(rows as any);
     if (error) return toast.error(error.message);
@@ -56,12 +58,13 @@ function AdminLlave() {
     refetch();
   };
 
-  const semi1 = matches.find((m) => m.phase === "semifinal" && m.match_order === 1);
-  const semi2 = matches.find((m) => m.phase === "semifinal" && m.match_order === 2);
-  const third = matches.find((m) => m.phase === "third_place");
-  const final = matches.find((m) => m.phase === "final");
+  const setFinalists = async (sport: Sport) => {
+    const sportMatches = matches.filter((m) => m.sport === sport);
+    const semi1 = sportMatches.find((m) => m.phase === "semifinal" && m.match_order === 1);
+    const semi2 = sportMatches.find((m) => m.phase === "semifinal" && m.match_order === 2);
+    const third = sportMatches.find((m) => m.phase === "third_place");
+    const final = sportMatches.find((m) => m.phase === "final");
 
-  const setFinalists = async () => {
     const winner = (m?: Match) => m?.played && m.home_score! > m.away_score! ? m.home_team_id : m?.played ? m.away_team_id : null;
     const loser = (m?: Match) => m?.played && m.home_score! < m.away_score! ? m.home_team_id : m?.played ? m.away_team_id : null;
     const w1 = winner(semi1), w2 = winner(semi2), l1 = loser(semi1), l2 = loser(semi2);
@@ -72,34 +75,63 @@ function AdminLlave() {
     refetch();
   };
 
+  const SportTab = ({ sport, label }: { sport: Sport; label: string }) => {
+    const sportMatches = matches.filter((m) => m.sport === sport);
+    const semi1 = sportMatches.find((m) => m.phase === "semifinal" && m.match_order === 1);
+    const semi2 = sportMatches.find((m) => m.phase === "semifinal" && m.match_order === 2);
+    const third = sportMatches.find((m) => m.phase === "third_place");
+    const final = sportMatches.find((m) => m.phase === "final");
+
+    const mvpKey = sport === "futbol" ? "mvp_futbol_player_id" : "mvp_basquet_player_id";
+
+    return (
+      <TabsContent key={sport} value={sport} className="space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="font-display text-xl font-semibold text-primary">Llave {label}</h2>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setFinalists(sport)}>Asignar finalistas</Button>
+            <Button variant="hero" onClick={() => generateKnockout(sport)}>
+              <Sparkles className="mr-2 h-4 w-4" /> Generar llave
+            </Button>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+          <Bracket teams={teams} matches={matches} sport={sport} />
+        </div>
+
+        <div className="grid gap-3 lg:grid-cols-2">
+          {[semi1, semi2, third, final].filter(Boolean).map((m) => (
+            <KnockoutEditor key={m!.id} match={m!} teams={teams} onChanged={refetch} />
+          ))}
+        </div>
+
+        <GoalsManager matches={sportMatches} teams={teams} players={players} goals={goals.filter((g) => sportMatches.some((m) => m.id === g.match_id))} onChanged={refetch} />
+
+        <MvpPicker awards={awards} players={players} teams={teams} onChanged={refetch} mvpKey={mvpKey} label={`MVP ${label}`} />
+      </TabsContent>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-primary">Llave final y MVP</h1>
-          <p className="text-sm text-muted-foreground">Cruces, finalistas y premios.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={setFinalists}>Asignar finalistas</Button>
-          <Button variant="hero" onClick={generateKnockout}>
-            <Sparkles className="mr-2 h-4 w-4" /> Generar llave
-          </Button>
+          <p className="text-sm text-muted-foreground">Cruces, finalistas y premios por deporte.</p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-        <Bracket teams={teams} matches={matches} />
-      </div>
-
-      <div className="grid gap-3 lg:grid-cols-2">
-        {[semi1, semi2, third, final].filter(Boolean).map((m) => (
-          <KnockoutEditor key={m!.id} match={m!} teams={teams} onChanged={refetch} />
-        ))}
-      </div>
-
-      <GoalsManager matches={matches} teams={teams} players={players} goals={goals} onChanged={refetch} />
-
-      <MvpPicker awards={awards} players={players} teams={teams} onChanged={refetch} />
+      <Tabs defaultValue="futbol" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="futbol">Fútbol</TabsTrigger>
+          <TabsTrigger value="basquet">Básquet</TabsTrigger>
+        </TabsList>
+        <SportTab sport="futbol" label="de fútbol" />
+        <SportTab sport="basquet" label="de básquet" />
+      </Tabs>
     </div>
   );
 }
@@ -107,8 +139,8 @@ function AdminLlave() {
 function KnockoutEditor({ match, teams, onChanged }: { match: Match; teams: Tables<"teams">[]; onChanged: () => void }) {
   const home = teams.find((t) => t.id === match.home_team_id);
   const away = teams.find((t) => t.id === match.away_team_id);
-  const [hs, setHs] = useState(match.home_score?.toString() ?? "");
-  const [as_, setAs] = useState(match.away_score?.toString() ?? "");
+  const [hs, setHs] = useState<string>(match.home_score?.toString() ?? "");
+  const [as_, setAs] = useState<string>(match.away_score?.toString() ?? "");
   const [date, setDate] = useState(match.match_date ?? "");
   const [time, setTime] = useState(match.match_time ?? "");
   const label = match.phase === "semifinal" ? `Semifinal ${match.match_order}` : match.phase === "third_place" ? "Tercer lugar" : "Final";
@@ -216,13 +248,13 @@ function GoalsManager({
 }
 
 function MvpPicker({
-  awards, players, teams, onChanged,
-}: { awards: any; players: Tables<"players">[]; teams: Tables<"teams">[]; onChanged: () => void }) {
-  const [pid, setPid] = useState<string>(awards?.mvp_player_id ?? "");
+  awards, players, teams, onChanged, mvpKey, label,
+}: { awards: any; players: Tables<"players">[]; teams: Tables<"teams">[]; onChanged: () => void; mvpKey: string; label: string }) {
+  const [pid, setPid] = useState<string>((awards as any)?.[mvpKey] ?? "");
 
   const save = async () => {
     if (!awards) return;
-    const { error } = await supabase.from("tournament_awards").update({ mvp_player_id: pid || null }).eq("id", awards.id);
+    const { error } = await supabase.from("tournament_awards").update({ [mvpKey]: pid || null }).eq("id", awards.id);
     if (error) return toast.error(error.message);
     toast.success("MVP actualizado");
     onChanged();
@@ -232,7 +264,7 @@ function MvpPicker({
     <div className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
       <div className="mb-3 flex items-center gap-2">
         <Star className="h-5 w-5 text-accent" />
-        <h2 className="font-display text-lg font-semibold text-primary">MVP del torneo</h2>
+        <h2 className="font-display text-lg font-semibold text-primary">{label}</h2>
       </div>
       <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
         <Select value={pid} onValueChange={setPid}>
