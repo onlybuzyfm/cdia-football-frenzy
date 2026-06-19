@@ -51,7 +51,7 @@ function HomePage() {
         <div className="relative mx-auto max-w-7xl px-4 py-14 sm:py-20">
           <p className="font-display text-xs uppercase tracking-[0.3em] text-accent">Torneo oficial</p>
           <h1 className="mt-2 font-display text-4xl font-bold leading-tight sm:text-6xl">
-            Juego CDIA<br />
+            Campeonato CDIA<br />
             <span className="text-accent">Segunda Edición</span>
           </h1>
           <p className="mt-4 max-w-xl text-white/85">
