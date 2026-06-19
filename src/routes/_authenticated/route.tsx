@@ -11,12 +11,12 @@ function AuthLayout() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
+    if (!loading && !user) {
       navigate({ to: "/auth" });
     }
-  }, [user, isAdmin, loading, navigate]);
+  }, [user, loading, navigate]);
 
-  if (loading || !user || !isAdmin) {
+  if (loading || !user) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center text-muted-foreground">
         Verificando acceso…
