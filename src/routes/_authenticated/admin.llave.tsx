@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { teamsQuery, matchesQuery, playersQuery, awardsQuery, goalsQuery } from "@/lib/queries";
-import { getQualifiers, type Sport } from "@/lib/tournament";
+import { getQualifiers } from "@/lib/tournament";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,6 @@ import { Sparkles, Save, Star, Goal, Trash2 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 import { TeamLogo } from "@/components/team-logo";
 import { Bracket } from "@/components/bracket";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/admin/llave")({
   component: AdminLlave,
@@ -35,103 +34,106 @@ function AdminLlave() {
     qc.invalidateQueries({ queryKey: ["goals"] });
   };
 
-  const generateKnockout = async (sport: Sport) => {
-    const q = useMemo(() => getQualifiers(teams, matches, sport), [teams, matches, sport]);
+  const semi1 = matches.find((m) => m.phase === "semifinal" && m.match_order === 1);
+  const semi2 = matches.find((m) => m.phase === "semifinal" && m.match_order === 2);
+  const third = matches.find((m) => m.phase === "third_place");
+  const final = matches.find((m) => m.phase === "final");
+  const hasKnockout = !!(semi1 || semi2 || third || final);
+
+  const groupMatches = matches.filter((m) => m.phase === "group");
+  const allGroupPlayed = groupMatches.length === 12 && groupMatches.every((m) => m.played);
+
+  const generateKnockout = async (confirmReplace = true) => {
+    const q = getQualifiers(teams, matches);
     if (!q.A1 || !q.A2 || !q.B1 || !q.B2) {
       return toast.error("Termina la fase de grupos para conocer a los clasificados.");
     }
-    const hasKnockout = matches.some((m) => m.phase !== "group" && m.sport === sport);
     if (hasKnockout) {
-      if (!confirm(`Esto reemplaza semifinales, 3er lugar y final de ${sport}. ¿Continuar?`)) return;
-      const { error } = await supabase.from("matches").delete().in("phase", ["semifinal", "third_place", "final"]).eq("sport", sport);
+      if (confirmReplace && !confirm("Esto reemplaza semifinales, 3er lugar y final. ¿Continuar?")) return;
+      const { error } = await supabase.from("matches").delete().in("phase", ["semifinal", "third_place", "final"]);
       if (error) return toast.error(error.message);
     }
     const rows = [
-      { phase: "semifinal" as const, match_order: 1, home_team_id: q.A1.id, away_team_id: q.B2.id, sport },
-      { phase: "semifinal" as const, match_order: 2, home_team_id: q.B1.id, away_team_id: q.A2.id, sport },
-      { phase: "third_place" as const, match_order: 1, home_team_id: null, away_team_id: null, sport },
-      { phase: "final" as const, match_order: 1, home_team_id: null, away_team_id: null, sport },
+      { phase: "semifinal" as const, match_order: 1, home_team_id: q.A1.id, away_team_id: q.B2.id },
+      { phase: "semifinal" as const, match_order: 2, home_team_id: q.B1.id, away_team_id: q.A2.id },
+      { phase: "third_place" as const, match_order: 1, home_team_id: null, away_team_id: null },
+      { phase: "final" as const, match_order: 1, home_team_id: null, away_team_id: null },
     ];
-    const { error } = await supabase.from("matches").insert(rows as any);
+    const { error } = await supabase.from("matches").insert(rows);
     if (error) return toast.error(error.message);
     toast.success("Llave generada");
     refetch();
   };
 
-  const setFinalists = async (sport: Sport) => {
-    const sportMatches = matches.filter((m) => m.sport === sport);
-    const semi1 = sportMatches.find((m) => m.phase === "semifinal" && m.match_order === 1);
-    const semi2 = sportMatches.find((m) => m.phase === "semifinal" && m.match_order === 2);
-    const third = sportMatches.find((m) => m.phase === "third_place");
-    const final = sportMatches.find((m) => m.phase === "final");
-
-    const winner = (m?: Match) => m?.played && m.home_score! > m.away_score! ? m.home_team_id : m?.played ? m.away_team_id : null;
-    const loser = (m?: Match) => m?.played && m.home_score! < m.away_score! ? m.home_team_id : m?.played ? m.away_team_id : null;
+  const setFinalists = async (silent = false) => {
+    const winner = (m?: Match) => (m?.played && m.home_score! > m.away_score! ? m.home_team_id : m?.played ? m.away_team_id : null);
+    const loser = (m?: Match) => (m?.played && m.home_score! < m.away_score! ? m.home_team_id : m?.played ? m.away_team_id : null);
     const w1 = winner(semi1), w2 = winner(semi2), l1 = loser(semi1), l2 = loser(semi2);
-    if (!w1 || !w2) return toast.error("Carga primero los resultados de ambas semifinales.");
-    if (final) await supabase.from("matches").update({ home_team_id: w1, away_team_id: w2 }).eq("id", final.id);
-    if (third) await supabase.from("matches").update({ home_team_id: l1, away_team_id: l2 }).eq("id", third.id);
-    toast.success("Final y tercer lugar actualizados");
+    if (!w1 || !w2) {
+      if (!silent) toast.error("Carga primero los resultados de ambas semifinales.");
+      return;
+    }
+    if (final && (final.home_team_id !== w1 || final.away_team_id !== w2)) {
+      await supabase.from("matches").update({ home_team_id: w1, away_team_id: w2 }).eq("id", final.id);
+    }
+    if (third && (third.home_team_id !== l1 || third.away_team_id !== l2)) {
+      await supabase.from("matches").update({ home_team_id: l1, away_team_id: l2 }).eq("id", third.id);
+    }
+    if (!silent) toast.success("Final y tercer lugar actualizados");
     refetch();
   };
 
-  const SportTab = ({ sport, label }: { sport: Sport; label: string }) => {
-    const sportMatches = matches.filter((m) => m.sport === sport);
-    const semi1 = sportMatches.find((m) => m.phase === "semifinal" && m.match_order === 1);
-    const semi2 = sportMatches.find((m) => m.phase === "semifinal" && m.match_order === 2);
-    const third = sportMatches.find((m) => m.phase === "third_place");
-    const final = sportMatches.find((m) => m.phase === "final");
+  // Auto-generate knockout when group phase completes
+  const autoGenRef = useRef(false);
+  useEffect(() => {
+    if (allGroupPlayed && !hasKnockout && !autoGenRef.current) {
+      autoGenRef.current = true;
+      generateKnockout(false);
+    }
+  }, [allGroupPlayed, hasKnockout]);
 
-    const mvpKey = sport === "futbol" ? "mvp_futbol_player_id" : "mvp_basquet_player_id";
-
-    return (
-      <TabsContent key={sport} value={sport} className="space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="font-display text-xl font-semibold text-primary">Llave {label}</h2>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setFinalists(sport)}>Asignar finalistas</Button>
-            <Button variant="hero" onClick={() => generateKnockout(sport)}>
-              <Sparkles className="mr-2 h-4 w-4" /> Generar llave
-            </Button>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-          <Bracket teams={teams} matches={matches} sport={sport} />
-        </div>
-
-        <div className="grid gap-3 lg:grid-cols-2">
-          {[semi1, semi2, third, final].filter(Boolean).map((m) => (
-            <KnockoutEditor key={m!.id} match={m!} teams={teams} onChanged={refetch} />
-          ))}
-        </div>
-
-        <GoalsManager matches={sportMatches} teams={teams} players={players} goals={goals.filter((g) => sportMatches.some((m) => m.id === g.match_id))} onChanged={refetch} />
-
-        <MvpPicker awards={awards} players={players} teams={teams} onChanged={refetch} mvpKey={mvpKey} label={`MVP ${label}`} />
-      </TabsContent>
-    );
-  };
+  // Auto-fill final / third place when both semis are played
+  const autoFinalRef = useRef(false);
+  const bothSemisPlayed = !!(semi1?.played && semi2?.played);
+  useEffect(() => {
+    if (!bothSemisPlayed) { autoFinalRef.current = false; return; }
+    if (autoFinalRef.current) return;
+    autoFinalRef.current = true;
+    setFinalists(true);
+  }, [bothSemisPlayed, semi1?.home_score, semi1?.away_score, semi2?.home_score, semi2?.away_score]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-primary">Llave final y MVP</h1>
-          <p className="text-sm text-muted-foreground">Cruces, finalistas y premios por deporte.</p>
+          <p className="text-sm text-muted-foreground">
+            La llave se genera automáticamente al terminar la fase de grupos.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setFinalists(false)} disabled={!hasKnockout}>
+            Asignar finalistas
+          </Button>
+          <Button variant="hero" onClick={() => generateKnockout(true)}>
+            <Sparkles className="mr-2 h-4 w-4" /> Generar llave
+          </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="futbol" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="futbol">Fútbol</TabsTrigger>
-          <TabsTrigger value="basquet">Básquet</TabsTrigger>
-        </TabsList>
-        <SportTab sport="futbol" label="de fútbol" />
-        <SportTab sport="basquet" label="de básquet" />
-      </Tabs>
+      <div className="rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+        <Bracket teams={teams} matches={matches} />
+      </div>
+
+      <div className="grid gap-3 lg:grid-cols-2">
+        {[semi1, semi2, third, final].filter(Boolean).map((m) => (
+          <KnockoutEditor key={m!.id} match={m!} teams={teams} onChanged={refetch} />
+        ))}
+      </div>
+
+      <GoalsManager matches={matches} teams={teams} players={players} goals={goals} onChanged={refetch} />
+
+      <MvpPicker awards={awards} players={players} teams={teams} onChanged={refetch} mvpKey="mvp_futbol_player_id" label="MVP del torneo" />
     </div>
   );
 }
