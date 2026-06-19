@@ -141,7 +141,7 @@ export function SiteFooter() {
   return (
     <footer className="mt-12 border-t border-border bg-secondary text-secondary-foreground/85">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm sm:flex-row">
-        <p className="font-display text-base text-white">Juego CDIA · Segunda Edición</p>
+        <p className="font-display text-base text-white">Campeonato CDIA · Segunda Edición</p>
         <p className="text-secondary-foreground/70">
           Desarrollado por <span className="font-semibold text-accent">PerceptIA</span>
         </p>
