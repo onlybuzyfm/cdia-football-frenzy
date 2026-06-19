@@ -76,6 +76,60 @@ export function generateRoundRobin(teamIds: string[]): Array<{ home: string; awa
   ];
 }
 
+export type Sport = "futbol" | "basquet";
+
+export interface ScheduledMatch {
+  sport: Sport;
+  group: "A" | "B";
+  home: string;
+  away: string;
+}
+
+/**
+ * Order all group-phase matches across both sports so that:
+ *  - No team plays in two consecutive slots.
+ *  - Sports are alternated whenever possible.
+ * Uses backtracking; with 24 matches and 8 teams it resolves quickly.
+ */
+export function scheduleGroupPhase(matches: ScheduledMatch[]): ScheduledMatch[] {
+  const n = matches.length;
+  const used = new Array(n).fill(false);
+  const seq: number[] = [];
+
+  const shares = (m: ScheduledMatch, prev: ScheduledMatch) =>
+    m.home === prev.home || m.home === prev.away || m.away === prev.home || m.away === prev.away;
+
+  const bt = (): boolean => {
+    if (seq.length === n) return true;
+    const prev = seq.length ? matches[seq[seq.length - 1]] : null;
+    const candidates: number[] = [];
+    for (let i = 0; i < n; i++) {
+      if (used[i]) continue;
+      if (prev && shares(matches[i], prev)) continue;
+      candidates.push(i);
+    }
+    // Prefer alternating sport
+    if (prev) {
+      candidates.sort((a, b) => {
+        const aDiff = matches[a].sport !== prev.sport ? 0 : 1;
+        const bDiff = matches[b].sport !== prev.sport ? 0 : 1;
+        return aDiff - bDiff;
+      });
+    }
+    for (const i of candidates) {
+      used[i] = true;
+      seq.push(i);
+      if (bt()) return true;
+      seq.pop();
+      used[i] = false;
+    }
+    return false;
+  };
+
+  if (!bt()) return matches; // fallback: original order
+  return seq.map((i) => matches[i]);
+}
+
 export function getQualifiers(teams: Team[], matches: Match[]) {
   const a = computeStandings(teams, matches, "A");
   const b = computeStandings(teams, matches, "B");

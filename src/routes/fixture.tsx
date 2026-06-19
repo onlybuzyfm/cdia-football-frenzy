@@ -29,7 +29,11 @@ function FixturePage() {
   const byId = new Map(teams.map((t) => [t.id, t]));
 
   const grouped = matches.reduce<Record<string, typeof matches>>((acc, m) => {
-    const key = m.phase === "group" ? `Grupo ${m.group_name ?? ""}` : PHASE_LABEL[m.phase];
+    const sportLabel = m.sport === "basquet" ? "Básquet" : "Fútbol";
+    const key =
+      m.phase === "group"
+        ? `${sportLabel} · Grupo ${m.group_name ?? ""}`
+        : `${sportLabel} · ${PHASE_LABEL[m.phase]}`;
     (acc[key] ??= []).push(m);
     return acc;
   }, {});

@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { teamsQuery, matchesQuery } from "@/lib/queries";
-import { generateRoundRobin } from "@/lib/tournament";
+import { generateRoundRobin, scheduleGroupPhase, type ScheduledMatch } from "@/lib/tournament";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,19 +37,22 @@ function AdminPartidos() {
       const { error: delErr } = await supabase.from("matches").delete().eq("phase", "group");
       if (delErr) return toast.error(delErr.message);
     }
-    const rows: any[] = [];
-    for (const [group, list] of [["A", groupA], ["B", groupB]] as const) {
-      const fixture = generateRoundRobin(list.map((t) => t.id));
-      fixture.forEach((f, i) => {
-        rows.push({
-          phase: "group",
-          group_name: group,
-          home_team_id: f.home,
-          away_team_id: f.away,
-          match_order: i + 1,
-        });
-      });
+    const all: ScheduledMatch[] = [];
+    for (const sport of ["futbol", "basquet"] as const) {
+      for (const [group, list] of [["A", groupA], ["B", groupB]] as const) {
+        const fx = generateRoundRobin(list.map((t) => t.id));
+        fx.forEach((f) => all.push({ sport, group, home: f.home, away: f.away }));
+      }
     }
+    const scheduled = scheduleGroupPhase(all);
+    const rows = scheduled.map((m, i) => ({
+      phase: "group" as const,
+      sport: m.sport,
+      group_name: m.group,
+      home_team_id: m.home,
+      away_team_id: m.away,
+      match_order: i + 1,
+    }));
     const { error } = await supabase.from("matches").insert(rows);
     if (error) return toast.error(error.message);
     toast.success("Fixture generado");
@@ -68,19 +71,26 @@ function AdminPartidos() {
         </Button>
       </div>
 
-      {["A", "B"].map((g) => (
-        <section key={g}>
-          <h2 className="mb-2 font-display text-lg font-semibold text-secondary">Grupo {g}</h2>
-          <div className="space-y-2">
-            {groupMatches.filter((m) => m.group_name === g).map((m) => (
-              <MatchRow key={m.id} match={m} teams={teams} onChanged={refetch} />
-            ))}
-            {groupMatches.filter((m) => m.group_name === g).length === 0 && (
-              <p className="text-sm text-muted-foreground">Sin partidos generados.</p>
-            )}
-          </div>
-        </section>
-      ))}
+      {(["futbol", "basquet"] as const).map((sport) =>
+        (["A", "B"] as const).map((g) => {
+          const list = groupMatches.filter((m) => m.group_name === g && m.sport === sport);
+          return (
+            <section key={`${sport}-${g}`}>
+              <h2 className="mb-2 font-display text-lg font-semibold text-secondary">
+                {sport === "futbol" ? "Fútbol" : "Básquet"} · Grupo {g}
+              </h2>
+              <div className="space-y-2">
+                {list.map((m) => (
+                  <MatchRow key={m.id} match={m} teams={teams} onChanged={refetch} />
+                ))}
+                {list.length === 0 && (
+                  <p className="text-sm text-muted-foreground">Sin partidos generados.</p>
+                )}
+              </div>
+            </section>
+          );
+        })
+      )}
     </div>
   );
 }
