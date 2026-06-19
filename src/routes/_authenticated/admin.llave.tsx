@@ -254,7 +254,8 @@ function MvpPicker({
 
   const save = async () => {
     if (!awards) return;
-    const { error } = await supabase.from("tournament_awards").update({ [mvpKey]: pid || null }).eq("id", awards.id);
+    const updateData: any = { [mvpKey]: pid || null };
+    const { error } = await supabase.from("tournament_awards").update(updateData).eq("id", awards.id);
     if (error) return toast.error(error.message);
     toast.success("MVP actualizado");
     onChanged();
