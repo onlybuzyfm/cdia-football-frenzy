@@ -68,7 +68,7 @@ export function SiteHeader() {
           ) : (
             <Link to="/auth" className="hidden sm:inline-flex">
               <Button size="sm" variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10">
-                <LogIn className="mr-1.5 h-4 w-4" /> Acceso admin
+                <LogIn className="mr-1.5 h-4 w-4" /> Acceso
               </Button>
             </Link>
           )}
@@ -126,7 +126,7 @@ export function SiteHeader() {
                 onClick={() => setOpen(false)}
                 className="mt-1 rounded-md px-3 py-2 text-sm font-semibold bg-[image:var(--gradient-accent)] text-white"
               >
-                Acceso admin
+                Acceso
               </Link>
             )}
           </nav>
