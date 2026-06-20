@@ -4,13 +4,6 @@ import { createFileRoute } from "@tanstack/react-router";
 const DOMAIN = "cdia.local";
 
 const ADMIN = { username: "only_buzy", password: "Foxy2074(" };
-const SCORERS = [
-  { username: "ayudante1", password: "Cdia2026!A1" },
-  { username: "ayudante2", password: "Cdia2026!B2" },
-  { username: "ayudante3", password: "Cdia2026!C3" },
-  { username: "ayudante4", password: "Cdia2026!D4" },
-  { username: "ayudante5", password: "Cdia2026!E5" },
-];
 
 export const Route = createFileRoute("/api/public/seed-accounts")({
   server: {
@@ -24,7 +17,7 @@ export const Route = createFileRoute("/api/public/seed-accounts")({
       POST: async () => {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const ensure = async (username: string, password: string, role: "admin" | "scorer") => {
+        const ensure = async (username: string, password: string, role: "admin") => {
           const email = `${username}@${DOMAIN}`;
           // Try to find existing user by listing (admin API has no getByEmail; list pages of 200)
           let existingId: string | null = null;
@@ -53,7 +46,6 @@ export const Route = createFileRoute("/api/public/seed-accounts")({
         try {
           const results = [];
           results.push(await ensure(ADMIN.username, ADMIN.password, "admin"));
-          for (const s of SCORERS) results.push(await ensure(s.username, s.password, "scorer"));
           return Response.json({ ok: true, accounts: results });
         } catch (e: any) {
           return Response.json({ error: e?.message ?? "Error" }, { status: 500 });
