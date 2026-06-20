@@ -36,9 +36,8 @@ function AdminLlave() {
 
   const semi1 = matches.find((m) => m.phase === "semifinal" && m.match_order === 1);
   const semi2 = matches.find((m) => m.phase === "semifinal" && m.match_order === 2);
-  const third = matches.find((m) => m.phase === "third_place");
   const final = matches.find((m) => m.phase === "final");
-  const hasKnockout = !!(semi1 || semi2 || third || final);
+  const hasKnockout = !!(semi1 || semi2 || final);
 
   const groupMatches = matches.filter((m) => m.phase === "group");
   const allGroupPlayed = groupMatches.length === 12 && groupMatches.every((m) => m.played);
@@ -56,7 +55,6 @@ function AdminLlave() {
     const rows = [
       { phase: "semifinal" as const, match_order: 1, home_team_id: q.A1.id, away_team_id: q.B2.id },
       { phase: "semifinal" as const, match_order: 2, home_team_id: q.B1.id, away_team_id: q.A2.id },
-      { phase: "third_place" as const, match_order: 1, home_team_id: null, away_team_id: null },
       { phase: "final" as const, match_order: 1, home_team_id: null, away_team_id: null },
     ];
     const { error } = await supabase.from("matches").insert(rows);
@@ -67,8 +65,7 @@ function AdminLlave() {
 
   const setFinalists = async (silent = false) => {
     const winner = (m?: Match) => (m?.played && m.home_score! > m.away_score! ? m.home_team_id : m?.played ? m.away_team_id : null);
-    const loser = (m?: Match) => (m?.played && m.home_score! < m.away_score! ? m.home_team_id : m?.played ? m.away_team_id : null);
-    const w1 = winner(semi1), w2 = winner(semi2), l1 = loser(semi1), l2 = loser(semi2);
+    const w1 = winner(semi1), w2 = winner(semi2);
     if (!w1 || !w2) {
       if (!silent) toast.error("Carga primero los resultados de ambas semifinales.");
       return;
@@ -76,10 +73,7 @@ function AdminLlave() {
     if (final && (final.home_team_id !== w1 || final.away_team_id !== w2)) {
       await supabase.from("matches").update({ home_team_id: w1, away_team_id: w2 }).eq("id", final.id);
     }
-    if (third && (third.home_team_id !== l1 || third.away_team_id !== l2)) {
-      await supabase.from("matches").update({ home_team_id: l1, away_team_id: l2 }).eq("id", third.id);
-    }
-    if (!silent) toast.success("Final y tercer lugar actualizados");
+    if (!silent) toast.success("Final actualizada");
     refetch();
   };
 
@@ -126,7 +120,7 @@ function AdminLlave() {
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        {[semi1, semi2, third, final].filter(Boolean).map((m) => (
+        {[semi1, semi2, final].filter(Boolean).map((m) => (
           <KnockoutEditor key={m!.id} match={m!} teams={teams} onChanged={refetch} />
         ))}
       </div>
