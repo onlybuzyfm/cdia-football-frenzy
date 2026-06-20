@@ -9,7 +9,7 @@ export const Route = createFileRoute("/llave")({
   head: () => ({
     meta: [
       { title: "Llave final · Juego CDIA" },
-      { name: "description", content: "Llave visual de semifinales, tercer lugar y final del torneo." },
+      { name: "description", content: "Llave visual de semifinales y final del torneo." },
     ],
   }),
   component: LlavePage,
