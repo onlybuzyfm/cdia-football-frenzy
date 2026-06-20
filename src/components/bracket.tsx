@@ -54,7 +54,6 @@ export function Bracket({
   const byId = new Map(teams.map((t) => [t.id, t]));
   const semi1 = filtered.find((m) => m.phase === "semifinal" && m.match_order === 1);
   const semi2 = filtered.find((m) => m.phase === "semifinal" && m.match_order === 2);
-  const third = filtered.find((m) => m.phase === "third_place");
   const final = filtered.find((m) => m.phase === "final");
 
   const winnerOf = (m?: Match) => {
@@ -94,14 +93,6 @@ export function Bracket({
             hs={final?.home_score}
             as={final?.away_score}
             played={final?.played}
-          />
-          <MatchCard
-            label="3er lugar"
-            home={byId.get(third?.home_team_id ?? "") ?? null}
-            away={byId.get(third?.away_team_id ?? "") ?? null}
-            hs={third?.home_score}
-            as={third?.away_score}
-            played={third?.played}
           />
         </div>
         <div className="flex w-56 flex-col items-center justify-center rounded-xl border border-accent/40 bg-[image:var(--gradient-accent)] p-6 text-center text-white shadow-[var(--shadow-elegant)]">
