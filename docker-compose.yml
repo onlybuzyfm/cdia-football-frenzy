@@ -1,0 +1,11 @@
+services:
+  champions-app:
+    build: .
+    container_name: champions-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3020:3000"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
